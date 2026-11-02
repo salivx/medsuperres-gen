@@ -86,14 +86,14 @@ def main():
                             hr=hr, lr_bicubic=lr_bic, lr_degraded=lr_deg, labels=labels)
 
         with open(os.path.join(args.splits_dir, f"{split}.csv"), "w", newline="") as f:
-            w = csv.writer(f)
+            w = csv.writer(f, lineterminator="\n")
             w.writerow(["index", "label", "sha1_hr"])
             for i, (img, y) in enumerate(zip(hr, labels)):
                 w.writerow([i, int(y), hashlib.sha1(img.tobytes()).hexdigest()])
         print(f"{split:5s}: {len(labels):5d} images  HR {hr.shape[1:]}  LR {lr_bic.shape[1:]}")
 
     with open(os.path.join(args.splits_dir, "class_counts.csv"), "w", newline="") as f:
-        w = csv.writer(f)
+        w = csv.writer(f, lineterminator="\n")
         w.writerow(["class_id", "class_name", *SPLITS, "train_pct"])
         n_train = counts["train"].sum()
         for c in class_ids:
