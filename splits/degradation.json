@@ -1,0 +1,14 @@
+{
+  "scale": 4,
+  "hr_size": 128,
+  "lr_size": 32,
+  "bicubic": "PIL Image.BICUBIC",
+  "degraded": {
+    "blur": "PIL GaussianBlur on HR",
+    "blur_sigma": 1.0,
+    "noise": "additive Gaussian on LR",
+    "noise_std_0_1": 0.0196078431372549,
+    "noise_seed": 2026,
+    "order": "blur -> bicubic -> noise"
+  }
+}
