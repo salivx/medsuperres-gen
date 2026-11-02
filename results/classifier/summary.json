@@ -1,0 +1,24 @@
+{
+  "seeds": [
+    0,
+    1,
+    2
+  ],
+  "test_real_hr_macro_f1_mean": 0.8030225385402763,
+  "test_real_hr_macro_f1_std": 0.010506765824439664,
+  "test_real_hr_per_class_recall_mean": [
+    0.6869,
+    0.8382,
+    0.7561,
+    0.8841,
+    0.7384,
+    0.9083,
+    0.931
+  ],
+  "best_epochs": [
+    27,
+    29,
+    28
+  ],
+  "gpu_minutes_total": 5.6
+}
