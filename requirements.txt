@@ -1,0 +1,11 @@
+numpy
+pillow
+medmnist>=3.0
+torch
+torchvision
+scikit-image
+scikit-learn
+lpips
+pyyaml
+tqdm
+matplotlib
