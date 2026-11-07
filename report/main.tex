@@ -1,0 +1,27 @@
+\documentclass[12pt,a4paper]{report}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[french]{babel}
+\usepackage{tgtermes}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{tikz}
+\usepackage{soul}
+\usepackage{fancyhdr}
+
+\definecolor{emsigreen}{RGB}{0,191,99}
+\definecolor{emsigray}{RGB}{125,125,125}
+% letter-spaced, underlined label, as on the template's cover ("R é a l i s é  p a r :")
+\sodef\sptext{}{.18em}{.45em}{0em}
+\newcommand{\spacedlabel}[1]{\underline{\sptext{#1}}}
+
+\pagestyle{fancy}
+\fancyhf{}
+\renewcommand{\headrulewidth}{0.5pt}
+\renewcommand{\footrulewidth}{0.5pt}
+\fancyfoot[R]{Page \thepage}
+
+\begin{document}
+\input{cover}
+\end{document}

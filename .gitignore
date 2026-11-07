@@ -8,3 +8,11 @@ checkpoints/
 runs/
 wandb/
 .venv/
+report/*.aux
+report/*.log
+report/*.out
+report/*.toc
+report/*.lof
+report/*.lot
+report/*.bbl
+report/*.blg

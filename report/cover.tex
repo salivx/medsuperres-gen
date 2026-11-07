@@ -1,0 +1,40 @@
+% ------------------------------------------------------------------ Cover page
+% Layout reproduces the group's EMSI report template (green bars, EMSI logo, spaced labels).
+% All positions are measured from the top-left corner of the A4 page, in cm.
+\begin{titlepage}
+\thispagestyle{empty}
+\begin{tikzpicture}[remember picture, overlay, x=1cm, y=-1cm,
+                    shift={(current page.north west)}]
+  % top-left bar
+  \fill[emsigreen] (0, 2.03) rectangle (8.46, 2.49);
+  % EMSI logo and the bar under it
+  \node[anchor=north west, inner sep=0] at (9.6, 2.67) {\includegraphics[width=8.3cm]{images/emsi_logo.png}};
+  \fill[emsigreen] (8.13, 5.03) rectangle (18.92, 5.54);
+  % programme
+  \node[anchor=center, align=center, text=emsigray, font=\bfseries\fontsize{15}{19}\selectfont]
+       at (13.84, 6.65) {INGENIERIE D'INTELLIGENCE\\ARTIFICIELLE \& SCIENCES DES DONNÉES};
+  \node[anchor=east, font=\small] at (19.55, 7.95) {\underline{ANNÉE UNIVERSITAIRE}};
+  \node[anchor=east, font=\normalsize] at (19.93, 8.86) {2026-2027};
+  % document type and course
+  \node[anchor=center, font=\bfseries\fontsize{30}{34}\selectfont] at (10.5, 10.25) {PROJET DE MATIÈRE};
+  \node[anchor=center, align=center, font=\fontsize{13}{17}\selectfont]
+       at (10.5, 11.55) {Module : Intelligence Artificielle Générative Visuelle\\
+                         \textit{(Visual Generative AI)}};
+  % theme
+  \node[anchor=west, font=\bfseries\fontsize{15}{18}\selectfont] at (2.67, 13.45) {THEME:};
+  \fill[emsigreen] (2.92, 13.92) rectangle (18.1, 14.02);
+  \node[anchor=north, align=center, text width=15cm, font=\bfseries\fontsize{15.5}{21}\selectfont]
+       at (10.5, 14.55) {MedSuperRes Gen : super-résolution ×4\\ de lésions cutanées par SRGAN et évaluation\\ de son utilité pour la classification dermatologique\\ (DermaMNIST, 32 → 128 px)};
+  % right-hand corner bracket
+  \fill[emsigreen] (20.47, 16.76) rectangle (21.0, 20.70);
+  \fill[emsigreen] (16.86, 20.19) rectangle (21.0, 20.70);
+  % left bar and people
+  \fill[emsigreen] (2.11, 22.09) rectangle (2.59, 26.97);
+  \node[anchor=west, font=\bfseries] at (3.30, 22.86) {\spacedlabel{Réalisé par}\ :};
+  \node[anchor=west] at (8.46, 22.86) {Salma Elfataoui \& Wiam Talbi Alami Idrissi};
+  \node[anchor=west, font=\bfseries] at (3.30, 24.20) {\spacedlabel{Encadré par}\ :};
+  \node[anchor=west] at (8.46, 24.20) {Pr. Oumaima Ouedhiri};
+  \node[anchor=west, font=\bfseries] at (3.30, 25.55) {\spacedlabel{Fiche projet}\ :};
+  \node[anchor=west] at (8.46, 25.55) {N\textsuperscript{o} 07 --- MedSuperRes Gen};
+\end{tikzpicture}
+\end{titlepage}
