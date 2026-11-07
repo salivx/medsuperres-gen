@@ -111,6 +111,19 @@ def bootstrap_ci(values=None, y=None, pred=None, seed=0):
     return [float(lo), float(hi)]
 
 
+def bootstrap_ci_seed_mean_f1(y, preds, seed=0):
+    """95% CI of the reported statistic itself: the mean over classifier seeds of macro F1,
+    resampling test images (same resample applied to every seed)."""
+    rng = np.random.default_rng(seed)
+    n = len(y)
+    stats = []
+    for _ in range(N_BOOT):
+        idx = rng.integers(0, n, n)
+        stats.append(np.mean([macro_f1(y[idx], p[idx]) for p in preds]))
+    lo, hi = np.percentile(stats, [2.5, 97.5])
+    return [float(lo), float(hi)]
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--data", default="data/processed")
@@ -120,6 +133,8 @@ def main():
     ap.add_argument("--out", default="results/eval")
     ap.add_argument("--save-images", default="outputs/sr_test", help="'' to skip saving SR images")
     ap.add_argument("--no-lpips", action="store_true")
+    ap.add_argument("--cross-degraded", action="store_true",
+                    help="also feed blur+noise inputs to models trained on bicubic inputs")
     ap.add_argument("--limit", type=int, default=0, help="debug: N test images")
     args = ap.parse_args()
 
@@ -151,6 +166,10 @@ def main():
         cfg = json.load(open(os.path.join(run, "config.json")))
         img, info = run_generator(run, lr[cfg["lr_key"]], device)
         methods.append((cfg["name"], cfg["lr_key"], img, info))
+        if args.cross_degraded and cfg["lr_key"] == "lr_bicubic":
+            # robustness without retraining: a model trained on bicubic inputs, fed blur + noise inputs
+            img2, info2 = run_generator(run, lr["lr_degraded"], device)
+            methods.append((cfg["name"] + "@degraded_input", "lr_degraded", img2, info2))
 
     hr_masks = lesion_masks(hr)
     hr_preds = [predict(m, hr, device).argmax(1) for m in classifiers]
@@ -169,7 +188,8 @@ def main():
 
         row = {"method": name, "input": key,
                "macro_f1_mean": f1s.mean(), "macro_f1_std": f1s.std(ddof=1) if len(f1s) > 1 else 0.0,
-               "macro_f1_ci95": bootstrap_ci(y=y, pred=ens_pred),
+               "macro_f1_ci95": bootstrap_ci_seed_mean_f1(y, preds),
+               "macro_f1_ensemble": float(macro_f1(y, ens_pred)),
                "agreement_with_HR_mean": agree.mean(),
                "params_G": info["params_G"], "ms_per_image": info["ms_per_image"]}
         for k, v in q.items():
@@ -177,12 +197,20 @@ def main():
             row[f"{k}_ci95"] = bootstrap_ci(values=v)
         rows.append(row)
         per_class_rows.append({"method": name, **{f"recall_c{c}": float(recalls[:, c].mean()) for c in range(NUM_CLASSES)}})
-        full[name] = {**row, "per_seed_macro_f1": f1s.tolist(), "per_class_recall_mean": recalls.mean(0).tolist(),
+        full[name] = {**row, "macro_f1_ci95_ensemble": bootstrap_ci(y=y, pred=ens_pred),
+                      "per_seed_macro_f1": f1s.tolist(), "per_class_recall_mean": recalls.mean(0).tolist(),
                       "config": info.get("config")}
         print(f"{name:22s} PSNR {row['psnr_mean']:6.2f}  SSIM {row['ssim_mean']:.4f}  "
               + (f"LPIPS {row['lpips_mean']:.4f}  " if "lpips_mean" in row else "")
               + f"Dice {row['dice_mean']:.4f}  F1 {row['macro_f1_mean']:.4f}±{row['macro_f1_std']:.4f}  "
               f"agree {row['agreement_with_HR_mean']:.4f}", flush=True)
+
+        # per-image outputs, used by make_figures.py (failure cases, error maps)
+        pi_dir = os.path.join(args.out, "per_image")
+        os.makedirs(pi_dir, exist_ok=True)
+        np.savez_compressed(os.path.join(pi_dir, f"{name}.npz"), labels=y, preds=np.stack(preds),
+                            pred_ens=ens_pred, probs_ens=np.mean(probs, axis=0).astype(np.float32),
+                            hr_preds=np.stack(hr_preds), **{k: v.astype(np.float32) for k, v in q.items()})
 
         if args.save_images and name != "real_HR":
             os.makedirs(args.save_images, exist_ok=True)
@@ -193,12 +221,14 @@ def main():
     with open(os.path.join(args.out, "metrics.json"), "w") as f:
         json.dump(full, f, indent=2, default=float)
     cols = ["method", "input", "psnr_mean", "ssim_mean", "lpips_mean", "edge_err_mean", "dice_mean",
-            "macro_f1_mean", "macro_f1_std", "agreement_with_HR_mean", "params_G", "ms_per_image"]
+            "macro_f1_mean", "macro_f1_std", "macro_f1_ci95", "agreement_with_HR_mean", "params_G", "ms_per_image"]
     with open(os.path.join(args.out, "metrics.csv"), "w", newline="") as f:
         w = csv.writer(f, lineterminator="\n")
         w.writerow(cols)
         for r in rows:
-            w.writerow([f"{r[c]:.4f}" if isinstance(r.get(c), float) else r.get(c, "") for c in cols])
+            w.writerow([f"{r[c]:.4f}" if isinstance(r.get(c), float)
+                        else (f"[{r[c][0]:.4f}; {r[c][1]:.4f}]" if isinstance(r.get(c), list) else r.get(c, ""))
+                        for c in cols])
     with open(os.path.join(args.out, "per_class_recall.csv"), "w", newline="") as f:
         w = csv.DictWriter(f, fieldnames=list(per_class_rows[0]), lineterminator="\n")
         w.writeheader(); w.writerows(per_class_rows)
