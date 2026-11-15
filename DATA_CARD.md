@@ -125,5 +125,6 @@ exactement les mêmes images.
 
 ## 8. Responsables
 
-Groupe : _à compléter (noms des membres)_.
+Groupe : Salma Elfataoui et Wiam Talbi Alami Idrissi (EMSI Marrakech, Ingénierie IA & Data Science).
+Encadrante : Pr. Oumaima Ouedhiri — module IA générative visuelle (Visual Generative AI), 2026-2027.
 Assistance IA : rédaction assistée par Claude (Anthropic), déclarée dans le README.
