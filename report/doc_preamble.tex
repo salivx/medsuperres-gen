@@ -1,0 +1,40 @@
+% Shared preamble for the project sheet and the data card (same look as the report).
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage{tgtermes}
+\usepackage[margin=2.5cm,top=2.6cm,headsep=0.8cm]{geometry}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{tikz}
+\usepackage{soul}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{array}
+\usepackage{float}
+\usepackage[font=small,labelfont=bf,skip=6pt]{caption}
+\usepackage[hidelinks]{hyperref}
+\usepackage{enumitem}
+\usepackage{microtype}
+\usepackage{titlesec}
+\usepackage{fancyhdr}
+
+\definecolor{emsigreen}{RGB}{0,191,99}
+\definecolor{emsigray}{RGB}{125,125,125}
+\sodef\sptext{}{.18em}{.45em}{0em}
+\newcommand{\spacedlabel}[1]{\underline{\sptext{#1}}}
+
+\titleformat{\section}{\Large\bfseries}{\thesection.}{0.5em}{}
+\titlespacing*{\section}{0pt}{18pt}{8pt}
+\setlist{itemsep=2pt,topsep=4pt,leftmargin=1.4em}
+\setlength{\parskip}{5pt}
+\setlength{\parindent}{0pt}
+\newcolumntype{L}{>{\raggedright\arraybackslash}X}
+\newcommand{\code}[1]{\texttt{\small #1}}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small MedSuperRes Gen --- \docname}
+\fancyhead[R]{\small Visual Generative AI, 2026--2027}
+\fancyfoot[C]{\small \thepage}
+\renewcommand{\headrulewidth}{0.4pt}

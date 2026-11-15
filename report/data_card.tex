@@ -1,53 +1,13 @@
 \documentclass[11pt,a4paper]{article}
-\usepackage[T1]{fontenc}
-\usepackage[utf8]{inputenc}
-\usepackage[english]{babel}
-\usepackage{tgtermes}
-\usepackage[margin=2.4cm,top=2.2cm]{geometry}
-\usepackage{graphicx}
-\usepackage{booktabs}
-\usepackage{tabularx}
-\usepackage{array}
-\usepackage{float}
-\usepackage[font=small,labelfont=bf,skip=6pt]{caption}
-\usepackage[hidelinks]{hyperref}
-\usepackage{enumitem}
-\usepackage{microtype}
-\usepackage{titlesec}
-
-\titleformat{\section}{\large\bfseries}{\thesection.}{0.5em}{}
-\titlespacing*{\section}{0pt}{14pt}{6pt}
-\setlist{itemsep=2pt,topsep=4pt,leftmargin=1.4em}
-\setlength{\parskip}{4pt}
-\setlength{\parindent}{0pt}
-\newcolumntype{L}{>{\raggedright\arraybackslash}X}
-\newcommand{\code}[1]{\texttt{\small #1}}
+\newcommand{\docname}{Data Card}
+\newcommand{\coverdoctype}{DATA CARD}
+\input{doc_preamble}
 
 \begin{document}
+\input{cover}
+\setcounter{page}{1}
 
-% ---------------------------------------------------------------- header
-\noindent
-\begin{minipage}[c]{0.42\textwidth}
-\includegraphics[width=5.2cm]{images/emsi_logo.png}
-\end{minipage}\hfill
-\begin{minipage}[c]{0.55\textwidth}
-\raggedleft\small
-Visual Generative AI --- Course project, brief No.~07\\
-AI \& Data Science Engineering, 2026--2027\\
-Supervisor: Prof.~Oumaima Ouedhiri
-\end{minipage}
-
-\vspace{10pt}\hrule\vspace{14pt}
-
-{\LARGE\bfseries Data Card: DermaMNIST 128 for $\times$4 Super-Resolution}\par
-\vspace{4pt}
-{\large MedSuperRes Gen}\par
-\vspace{6pt}
-Salma Elfataoui \quad Wiam Talbi Alami Idrissi\par
-\vspace{2pt}
-{\small Code, split files and results: \url{https://github.com/salivx/medsuperres-gen}}
-
-\vspace{12pt}
+\section{Overview}
 
 This card documents the data used to train and evaluate the super-resolution models of the
 project: where the images come from, how they were split and degraded, what they may and may not
@@ -68,8 +28,10 @@ Redistribution & No source image is stored in the repository; \code{src/prepare\
 \end{tabularx}
 \end{table}
 
+Code, split files and results: \url{https://github.com/salivx/medsuperres-gen}.
+
 % ---------------------------------------------------------------- 1
-\section{Composition}
+\section{Composition}\label{sec:comp}
 
 Each image shows one pigmented skin lesion seen through a dermatoscope and carries a single
 diagnostic label. Table~\ref{tab:classes} gives the number of images per class and split
@@ -198,7 +160,7 @@ but are only released at 28 and 224 px.
 \paragraph{Labels.} The same authors found mislabelled images in HAM10000 and DermaMNIST. We did
 not correct them.
 
-\paragraph{Imbalance.} See Section~1: classes 3 and 6 have very few examples.
+\paragraph{Imbalance.} See Section~\ref{sec:comp}: classes 3 and 6 have very few examples.
 
 \paragraph{Resolution of the target.} The 128~px images are themselves downsampled from the
 HAM10000 originals, so the ``ground truth'' of this project is already a reduced image.

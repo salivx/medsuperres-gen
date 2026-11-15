@@ -1,0 +1,130 @@
+\documentclass[11pt,a4paper]{article}
+\newcommand{\docname}{Project Sheet}
+\newcommand{\coverdoctype}{PROJECT SHEET}
+\input{doc_preamble}
+
+\begin{document}
+\input{cover}
+\setcounter{page}{1}
+
+% ---------------------------------------------------------------- 1
+\section{Objective}
+
+Train a generative model that turns a 32$\times$32 dermoscopic image into a 128$\times$128 image,
+and measure whether the reconstructed images are actually useful: whether a fixed skin-lesion
+classifier still recognises the lesion as well as on the real 128~px image.
+
+In practice the project must deliver:
+\begin{itemize}
+\item four generators trained under the same budget (A0, A, B, C), with an ablation of each added
+component;
+\item a comparison against plain bicubic upsampling and against the real images, on two kinds of
+low-resolution input;
+\item an evaluation that covers image quality, stability of the lesion's features and utility for
+classification, with confidence intervals;
+\item the reproducible code, frozen data splits, a data card and a report written as a scientific
+article.
+\end{itemize}
+
+% ---------------------------------------------------------------- 2
+\section{Problem statement}
+
+How can we reconstruct high-resolution skin-lesion images without distorting the visual cues that
+classification relies on?
+
+At 32~px, the details used to tell lesions apart --- the shape of the border, texture, the pigment
+network --- are largely lost. A GAN can bring sharpness back, but it does so by generating plausible
+detail, not by recovering the original one. A reconstruction can therefore look convincing and score
+well on image metrics while changing the very features that separate a melanoma from a benign
+nevus. In a medical setting this is the main risk: an invented detail must never be read as
+evidence.
+
+The question is made harder by the data. DermaMNIST is strongly imbalanced (nevi are two thirds of
+the images, dermatofibroma about 1\%), so accuracy is misleading and the rare classes must be
+followed one by one. Several images of the same lesion can also appear in different official splits,
+which may make test scores optimistic; this has to be stated as a limitation.
+
+% ---------------------------------------------------------------- 3
+\section{Approach}
+
+\paragraph{Data.} DermaMNIST 128~px (MedMNIST+), official train / validation / test splits, frozen
+before any training with one SHA-1 hash per image. The 32~px inputs are computed from the 128~px
+images with two degradations: bicubic $\times$4, and blur + bicubic $\times$4 + controlled noise.
+The test split is used once, at the end.
+
+\paragraph{Models.} An SRGAN generator with residual blocks, trained from scratch (no pretrained
+weights in the generator), against an SRGAN discriminator. Each variant adds one change, so that its
+effect can be isolated:
+
+\begin{table}[H]
+\centering\small
+\begin{tabularx}{\textwidth}{@{}p{1.2cm}L L@{}}
+\toprule
+Variant & Change & What it tests \\
+\midrule
+A0 & SRResNet trained with the L1 loss only & the effect of the adversarial loss \\
+A & L1 + adversarial loss (reference SRGAN) & the baseline GAN \\
+B & A + channel attention in the residual blocks & the effect of attention \\
+C & B + structure-preservation loss (Sobel edges + SSIM) & the effect of protecting edges; ablated \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+A frozen VGG perceptual loss is allowed by the course rules if it is declared and ablated, so each
+GAN variant is also trained with and without it. All variants get the same budget: 40 epochs, the
+same batch size, optimiser and seed.
+
+\paragraph{Evaluation.} A ResNet-18 classifier is trained once on the real 128~px training images
+(3 seeds), then frozen and applied unchanged to the test images produced by bicubic, A0, A, B, C and
+to the real images. It is never used inside a training loss, so the generators cannot be optimised
+for the evaluator. We measure:
+\begin{itemize}
+\item image quality: PSNR, SSIM, LPIPS and contour (Sobel) error;
+\item stability of the lesion: agreement between the classifier's predictions on super-resolved
+and real images, and Dice between Otsu lesion masks;
+\item utility: macro F1 and per-class recall (mean $\pm$ sd over 3 seeds, 95\% bootstrap
+confidence interval);
+\item cost: number of parameters and inference time per image.
+\end{itemize}
+Visual checks complete the numbers: zooms on lesion borders, error and contour maps, and failure
+cases where super-resolution changes the prediction.
+
+\paragraph{Tools.} Python and PyTorch, MedMNIST, scikit-image, LPIPS; training on Kaggle GPUs
+(T4); code and results versioned on GitHub.
+
+% ---------------------------------------------------------------- 4
+\section{Work plan}
+
+\begin{table}[H]
+\centering\small
+\begin{tabularx}{\textwidth}{@{}p{1.3cm}L p{4.2cm}@{}}
+\toprule
+Week & Tasks & Output \\
+\midrule
+S1 & Choose the brief; set up the repository; download DermaMNIST; freeze the splits; build the two
+degradations; study the class balance & frozen splits, data preparation script \\
+S2 & Write the data card; train the frozen ResNet-18 classifier (3 seeds); train baseline A0 &
+data card, classifier, first super-resolution model \\
+S3 & Train A and B, with and without the VGG loss & reference SRGAN and attention variant \\
+S4 & Train C and its ablation; train on blur + noise inputs. Fallback: if a model does not train
+properly, reduce its size or budget rather than extend the schedule & all variants trained \\
+S5 & Run the evaluation on the test set; bootstrap intervals; figures (zooms, error maps, failure
+cases); architecture diagram & results tables and figures \\
+S6 & Write the article; prepare the presentation; release code, configurations, weights and
+generated images & report, slides, final repository \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\paragraph{Deliverables.} Documented source code with preparation, training and evaluation scripts;
+configurations and saved weights; the generated images with metadata and a README; the data card;
+low-resolution / SRGAN / improved SRGAN comparisons with zooms; the annotated architecture diagram;
+the table of metrics with failure examples; and the report written as a scientific article, ending
+with a conclusion on the real usefulness of the generated images.
+
+\paragraph{Risks.} Generated images may contain invented medical structures: we show zooms on lesion
+borders and never present outputs as diagnostic evidence. GPU time on Kaggle is limited (about 30~h
+per week and per account) and sessions can be interrupted: training saves a checkpoint every epoch
+and can resume.
+
+\end{document}
